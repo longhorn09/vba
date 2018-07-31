@@ -1,9 +1,10 @@
+Option Explicit
 '#########################################################################
 '# random code examples
 '#########################################################################
-private sub RandomStuff
-    Dim regex, matches as Object
-    dim basePartNo as string
+Private Sub RandomStuff()
+    Dim regex, matches As Object
+    Dim basePartNo As String
     
     Set regex = CreateObject("VBScript.RegExp") 'need regular expressions to deal with part numbers
     regex.MultiLine = False
@@ -13,11 +14,11 @@ private sub RandomStuff
     If (regex.test(basePartNo)) Then
         Set matches = regex.Execute(basePartNo)
         basePartNo = matches(0).submatches(0) & matches(0).submatches(1) & " " & matches(0).submatches(2)
-    end if
+    End If
         
-    set matches = nothing
-    set regex = nothing
-end sub
+    Set matches = Nothing
+    Set regex = Nothing
+End Sub
 
 '#########################################################################
 '# PURPOSE: Convert a given number into it's corresponding Letter Reference
