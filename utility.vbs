@@ -1,4 +1,25 @@
 '#########################################################################
+'# random code examples
+'#########################################################################
+private sub RandomStuff
+    Dim regex, matches as Object
+    dim basePartNo as string
+    
+    Set regex = CreateObject("VBScript.RegExp") 'need regular expressions to deal with part numbers
+    regex.MultiLine = False
+    regex.IgnoreCase = True
+    regex.Pattern = "^([A-Za-z0-9]+)\-([A-Za-z0-9]{3})\-([A-Za-z0-9]+)"
+    
+    If (regex.test(basePartNo)) Then
+        Set matches = regex.Execute(basePartNo)
+        basePartNo = matches(0).submatches(0) & matches(0).submatches(1) & " " & matches(0).submatches(2)
+    end if
+        
+    set matches = nothing
+    set regex = nothing
+end sub
+
+'#########################################################################
 '# PURPOSE: Convert a given number into it's corresponding Letter Reference
 '# SOURCE: www.TheSpreadsheetGuru.com/the-code-vault
 '#########################################################################
@@ -52,7 +73,19 @@ Private Function LastCol(sh As Worksheet)
                             MatchCase:=False).Column
     On Error GoTo 0
 End Function
+'#########################################################################
+'# PURPOSE: Check if the worksheet exists
+'# SOURCE:  https://stackoverflow.com/questions/6688131/test-or-check-if-sheet-exists
+'#########################################################################
+Private Function SheetExists(ByVal shtName As String, Optional wb As Workbook) As Boolean
+    Dim sht As Worksheet
 
+     If wb Is Nothing Then Set wb = ThisWorkbook
+     On Error Resume Next
+     Set sht = wb.Sheets(shtName)
+     On Error GoTo 0
+     SheetExists = Not sht Is Nothing
+ End Function
 '#########################################################################
 '# adds a border around the selection
 '#########################################################################
