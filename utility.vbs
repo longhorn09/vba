@@ -1,4 +1,6 @@
 Option Explicit
+Private Const Unix1970 As Long = 25569 'CDbl(DateSerial(1970, 1, 1))
+
 '#########################################################################
 '# random code examples
 '#########################################################################
@@ -121,3 +123,24 @@ Private Sub AddBorder()
     Selection.Borders(xlInsideVertical).LineStyle = xlNone
     Selection.Borders(xlInsideHorizontal).LineStyle = xlNone
 End Sub
+
+'####################################################################################
+'# http://www.vbforums.com/showthread.php?513727-RESOLVED-Convert-Unix-Time-to-Date
+'####################################################################################
+Private Function Date2Unix(ByVal vDate As Date) As Long
+    Date2Unix = DateDiff("s", Unix1970, vDate)
+End Function
+
+Private Function Unix2Date(ByVal vUnixDate As Long) As Date
+    Unix2Date = DateAdd("s", vUnixDate, Unix1970)
+End Function
+Private Function UnixTimeToDate(ByVal Timestamp As Long) As Date
+    Dim intDays As Integer, intHours As Integer, intMins As Integer, intSecs As Integer
+ 
+    intDays = Timestamp \ 86400
+    intHours = (Timestamp Mod 86400) \ 3600
+    intMins = (Timestamp Mod 3600) \ 60
+    intSecs = Timestamp Mod 60
+    
+    UnixTimeToDate = DateSerial(1970, 1, intDays + 1) + TimeSerial(intHours, intMins, intSecs)
+End Function
