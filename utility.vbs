@@ -144,3 +144,71 @@ Private Function UnixTimeToDate(ByVal Timestamp As Long) As Date
     
     UnixTimeToDate = DateSerial(1970, 1, intDays + 1) + TimeSerial(intHours, intMins, intSecs)
 End Function
+'#########################################################################
+'# reference: https://www.exceldemy.com/excel-vba-paste-range-into-email-body/
+'#########################################################################
+Private Function RangetoHTML(rng As Range)
+    Dim obj As Object
+    Dim txtstr As Object
+    Dim File As String
+    Dim WB As Workbook
+    File = Environ$("temp") & "\" & Format(Now, "dd-mm-yy h-mm-ss") & ".htm"
+    rng.Copy
+    Set WB = Workbooks.Add(1)
+    With WB.Sheets(1)
+        .Cells(1).PasteSpecial Paste:=8
+        .Cells(1).PasteSpecial xlPasteValues, , False, False
+        .Cells(1).PasteSpecial xlPasteFormats, , False, False
+        .Cells(1).Select
+        Application.CutCopyMode = False
+        On Error Resume Next
+        .DrawingObjects.Visible = True
+        .DrawingObjects.Delete
+        On Error GoTo 0
+    End With
+    With WB.PublishObjects.Add( _
+         SourceType:=xlSourceRange, _
+         Filename:=File, _
+         Sheet:=WB.Sheets(1).Name, _
+         Source:=WB.Sheets(1).UsedRange.Address, _
+         HtmlType:=xlHtmlStatic)
+        .Publish (True)
+    End With
+    Set obj = CreateObject("Scripting.FileSystemObject")
+    Set txtstr = obj.GetFile(File).OpenAsTextStream(1, -2)
+    RangetoHTML = txtstr.readall
+    txtstr.Close
+    RangetoHTML = Replace(RangetoHTML, "align=center x:publishsource=", _
+                          "align=left x:publishsource=")
+    WB.Close savechanges:=False
+    Kill File
+    Set txtstr = Nothing
+    Set obj = Nothing
+    Set WB = Nothing
+End Function    
+        
+'#########################################################################
+'# https://www.extendoffice.com/documents/excel/5049-pasting-an-excel-range-into-an-email-as-a-picture.html
+'#########################################################################
+Private Sub createJpg(SheetName As String, xRgAddrss As String, nameFile As String)
+    Dim xRgPic As Range
+    Dim xShape As Shape
+    
+    ThisWorkbook.Activate
+    Worksheets(SheetName).Activate
+    Set xRgPic = ThisWorkbook.Worksheets(SheetName).Range(xRgAddrss)
+    xRgPic.CopyPicture
+    
+    With ThisWorkbook.Worksheets(SheetName).ChartObjects.Add(xRgPic.Left, xRgPic.Top, xRgPic.Width, xRgPic.Height)
+        .Activate
+        For Each xShape In ActiveSheet.Shapes
+            xShape.Line.Visible = msoFalse
+        Next
+        .Chart.Paste
+        .Chart.Export Environ$("temp") & "\" & nameFile & ".jpg", "JPG"
+    End With
+    
+    Worksheets(SheetName).ChartObjects(Worksheets(SheetName).ChartObjects.Count).Delete
+    
+    Set xRgPic = Nothing
+End Sub        
