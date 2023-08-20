@@ -21,7 +21,72 @@ Private Sub RandomStuff()
     Set matches = Nothing
     Set regex = Nothing
 End Sub
+'#########################################################################
+'# File Dialog stuff
+'#########################################################################
+Public Sub PickFile()
+    Dim wkdyMonth As String
+    Dim fd As FileDialog
+    Dim i As Integer
+    Dim keepGoing As Boolean
+    Dim filePath As String
+    Dim wb As Workbook
+    Dim currentSheetName As String
+    Dim newStartRow As Integer
+    'Const Path = "C:\Users\Desktop\"
+   
+    Set fd = Application.FileDialog(msoFileDialogFilePicker)
+    fd.Filters.Clear
+    fd.Filters.Add "Excel files", "*.xls*"
+    fd.Filters.Add "CSV files", "*.csv"
+    fd.Title = "Select the input file"
+    'fd.InitialFileName = Path
+   
+   
+    'Debug.Print Format(FormatDateTime(Now, vbShortDate), "mmmm")
+    wkdyMonth = Application.InputBox("Enter the month", Default:=Format(FormatDateTime(Now, vbShortDate), "mmmm"), Type:=2, Title:="Enter Month")
+   
+    i = fd.Show
+    If i <> -1 Then
+        keepGoing = False
+    Else
+        keepGoing = True
+    End If
+   
+    keepGoing = True
+    If keepGoing Then
+        Call DisableStuff
+        filePath = fd.SelectedItems(1)
+       
+        Call DeleteExisting(ActiveSheet.Name, wkdyMonth)
+        Set wb = Workbooks.Open(filePath)
+        newStartRow = AppendToExisting(wb, ActiveSheet.Name)
+        Call wb.Close
+        Call RemakeFormulas(newStartRow, wkdyMonth)
+        Call EnableStuff
+        Call MsgBox(LastRow(ActiveSheet) - newStartRow & " rows in " & wkdyMonth, vbInformation)
+    End If
+   
+    Set wb = Nothing
+    Set fd = Nothing
+End Sub
 
+'#########################################################################
+'# disable stuff
+'#########################################################################
+Private Sub DisableStuff()
+    Application.DisplayAlerts = False
+    Application.Calculation = xlCalculationManual
+    Application.ScreenUpdating = False
+End Sub
+'#########################################################################
+'# enable stuff
+'#########################################################################
+Private Sub EnableStuff()
+    Application.DisplayAlerts = True
+    Application.Calculation = xlCalculationAutomatic
+    Application.ScreenUpdating = True
+End Sub
 '#########################################################################
 '# PURPOSE: Convert a given number into it's corresponding Letter Reference
 '# SOURCE: www.TheSpreadsheetGuru.com/the-code-vault
